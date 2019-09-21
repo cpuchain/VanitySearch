@@ -38,7 +38,7 @@ Point _2Gn;
 
 // ----------------------------------------------------------------------------
 
-VanitySearch::VanitySearch(Secp256K1 *secp, vector<std::string> &inputPrefixes,string seed,int searchMode, 
+VanitySearch::VanitySearch(Secp256K1 *secp, vector<std::string> &inputPrefixes,string seed,int searchMode,
                            bool useGpu, bool stop, string outputFile, bool useSSE, uint32_t maxFound,
                            uint64_t rekey, bool caseSensitive, Point &startPubKey, bool paranoiacSeed)
   :inputPrefixes(inputPrefixes) {
@@ -235,14 +235,13 @@ VanitySearch::VanitySearch(Secp256K1 *secp, vector<std::string> &inputPrefixes,s
     // Wild card search
     switch (inputPrefixes[0].data()[0]) {
 
-    case '1':
+    case 'C':
       searchType = P2PKH;
       break;
-    case '3':
+    case 'D':
       searchType = P2SH;
       break;
-    case 'b':
-    case 'B':
+    case 'cpu1q':
       searchType = BECH32;
       break;
 
@@ -258,7 +257,7 @@ VanitySearch::VanitySearch(Secp256K1 *secp, vector<std::string> &inputPrefixes,s
     } else {
       printf("Search: %d patterns [%s]\n", (int)inputPrefixes.size(), searchInfo.c_str());
     }
-   
+
     patternFound = (bool *)malloc(inputPrefixes.size()*sizeof(bool));
     memset(patternFound,0, inputPrefixes.size() * sizeof(bool));
 
@@ -348,25 +347,24 @@ bool VanitySearch::initPrefix(std::string &prefix,PREFIX_ITEM *it) {
   }
 
   int aType = -1;
-  
+
 
   switch (prefix.data()[0]) {
-  case '1':
+  case 'C':
     aType = P2PKH;
     break;
-  case '3':
+  case 'D':
     aType = P2SH;
     break;
-  case 'b':
-  case 'B':
+  case 'cpu1q':
     std::transform(prefix.begin(), prefix.end(), prefix.begin(), ::tolower);
-    if(strncmp(prefix.c_str(), "bc1q", 4) == 0)
+    if(strncmp(prefix.c_str(), "cpu1q", 4) == 0)
       aType = BECH32;
     break;
   }
 
   if (aType==-1) {
-    printf("Ignoring prefix \"%s\" (must start with 1 or 3 or bc1q)\n", prefix.c_str());
+    printf("Ignoring prefix \"%s\" (must start with C or D or cpu1q)\n", prefix.c_str());
     return false;
   }
 
@@ -382,7 +380,7 @@ bool VanitySearch::initPrefix(std::string &prefix,PREFIX_ITEM *it) {
     uint8_t witprog[40];
     size_t witprog_len;
     int witver;
-    const char* hrp = "bc";
+    const char* hrp = "cpu";
 
     int ret = segwit_addr_decode(&witver, witprog, &witprog_len, hrp, prefix.c_str());
 
@@ -622,7 +620,7 @@ string VanitySearch::GetExpectedTime(double keyRate,double keyCount) {
 
   sprintf(tmp,"[Prob %.1f%%]",cP*100.0);
   ret = string(tmp);
-  
+
   double desiredP = 0.5;
   while(desiredP<cP)
     desiredP += 0.1;
@@ -673,7 +671,7 @@ void VanitySearch::output(string addr,string pAddr,string pAddrHex) {
 #else
   pthread_mutex_lock(&ghMutex);
 #endif
-  
+
   FILE *f = stdout;
   bool needToClose = false;
 
@@ -827,7 +825,7 @@ bool VanitySearch::checkPrivKey(string addr, Int &key, int32_t incr, int endomor
 
 }
 
-void VanitySearch::checkAddrSSE(uint8_t *h1, uint8_t *h2, uint8_t *h3, uint8_t *h4, 
+void VanitySearch::checkAddrSSE(uint8_t *h1, uint8_t *h2, uint8_t *h3, uint8_t *h4,
                                 int32_t incr1, int32_t incr2, int32_t incr3, int32_t incr4,
                                 Int &key, int endomorphism, bool mode) {
 
@@ -1352,7 +1350,7 @@ void VanitySearch::FindKeyCPU(TH_PARAM *ph) {
 
       pp.y.ModSub(&Gn[i].x, &pp.x);
       pp.y.ModMulK1(&_s);
-      pp.y.ModSub(&Gn[i].y);           // ry = - p2.y - s*(ret.x-p2.x);  
+      pp.y.ModSub(&Gn[i].y);           // ry = - p2.y - s*(ret.x-p2.x);
 
       // P = startP - i*G  , if (x,y) = i*G then (x,-y) = -i*G
       dyn.Set(&Gn[i].y);
@@ -1368,7 +1366,7 @@ void VanitySearch::FindKeyCPU(TH_PARAM *ph) {
 
       pn.y.ModSub(&Gn[i].x, &pn.x);
       pn.y.ModMulK1(&_s);
-      pn.y.ModAdd(&Gn[i].y);          // ry = - p2.y - s*(ret.x-p2.x);  
+      pn.y.ModAdd(&Gn[i].y);          // ry = - p2.y - s*(ret.x-p2.x);
 
       pts[CPU_GRP_SIZE/2 + (i+1)] = pp;
       pts[CPU_GRP_SIZE/2 - (i+1)] = pn;
@@ -1555,7 +1553,7 @@ void VanitySearch::FindKeyGPU(TH_PARAM *ph) {
 
       ITEM it = found[i];
       checkAddr(*(prefix_t *)(it.hash), it.hash, keys[it.thId], it.incr, it.endo, it.mode);
- 
+
     }
 
     if (ok) {
@@ -1666,7 +1664,7 @@ void VanitySearch::Search(int nbThread,std::vector<int> gpuId,std::vector<int> g
     ghMutex = CreateMutex(NULL, FALSE, NULL);
 #else
     pthread_t thread_id;
-    pthread_create(&thread_id, NULL, &_FindKey, (void*)(params+i));  
+    pthread_create(&thread_id, NULL, &_FindKey, (void*)(params+i));
     ghMutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
   }
@@ -1683,7 +1681,7 @@ void VanitySearch::Search(int nbThread,std::vector<int> gpuId,std::vector<int> g
     CreateThread(NULL, 0, _FindKeyGPU, (void*)(params+(nbCPUThread+i)), 0, &thread_id);
 #else
     pthread_t thread_id;
-    pthread_create(&thread_id, NULL, &_FindKeyGPU, (void*)(params+(nbCPUThread+i)));  
+    pthread_create(&thread_id, NULL, &_FindKeyGPU, (void*)(params+(nbCPUThread+i)));
 #endif
   }
 
