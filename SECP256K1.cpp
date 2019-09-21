@@ -81,7 +81,7 @@ void CheckAddress(Secp256K1 *T,std::string address,std::string privKeyStr) {
     type = P2PKH; break;
   case 'D':
     type = P2SH; break;
-  case 'cpu1q':
+  case 'c':
     type = BECH32; break;
   default:
     printf("Failed ! \n%s Address format not supported\n", address.c_str());

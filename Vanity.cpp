@@ -241,7 +241,7 @@ VanitySearch::VanitySearch(Secp256K1 *secp, vector<std::string> &inputPrefixes,s
     case 'D':
       searchType = P2SH;
       break;
-    case 'cpu1q':
+    case 'c':
       searchType = BECH32;
       break;
 
@@ -356,7 +356,7 @@ bool VanitySearch::initPrefix(std::string &prefix,PREFIX_ITEM *it) {
   case 'D':
     aType = P2SH;
     break;
-  case 'cpu1q':
+  case 'c':
     std::transform(prefix.begin(), prefix.end(), prefix.begin(), ::tolower);
     if(strncmp(prefix.c_str(), "cpu1q", 4) == 0)
       aType = BECH32;
