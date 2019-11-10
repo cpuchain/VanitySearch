@@ -77,12 +77,11 @@ void CheckAddress(Secp256K1 *T,std::string address,std::string privKeyStr) {
   Point pub = T->ComputePublicKey(&privKey);
 
   switch (address.data()[0]) {
-  case '1': 
+  case 'C':
     type = P2PKH; break;
-  case '3': 
+  case 'D':
     type = P2SH; break;
-  case 'b': 
-  case 'B':
+  case 'c':
     type = BECH32; break;
   default:
     printf("Failed ! \n%s Address format not supported\n", address.c_str());
@@ -147,7 +146,7 @@ void Secp256K1::Check() {
   CheckAddress(this,"3CyQYcByvcWK8BkYJabBS82yDLNWt6rWSx","KxMUSkFhEzt2eJHscv2vNSTnnV2cgAXgL4WDQBTx7Ubd9TZmACAz");
   CheckAddress(this,"31to1KQe67YjoDfYnwFJThsGeQcFhVDM5Q","KxV2Tx5jeeqLHZ1V9ufNv1doTZBZuAc5eY24e6b27GTkDhYwVad7");
   CheckAddress(this,"bc1q6tqytpg06uhmtnhn9s4f35gkt8yya5a24dptmn","L2wAVD273GwAxGuEDHvrCqPfuWg5wWLZWy6H3hjsmhCvNVuCERAQ");
-  
+
   // 1ViViGLEawN27xRzGrEhhYPQrZiTKvKLo
   pub.x.SetBase16(/*04*/"75249c39f38baa6bf20ab472191292349426dc3652382cdc45f65695946653dc");
   pub.y.SetBase16("978b2659122fe1df1be132167f27b74e5d4a2f3ecbbbd0b3fbcc2f4983518674");
@@ -226,16 +225,16 @@ Int Secp256K1::DecodePrivateKey(char *key,bool *compressed) {
     int count = 31;
     for(int i = 1; i < 33; i++)
       ret.SetByte(count--,privKey[i]);
-      
+
     // Compute checksum
     unsigned char c[4];
     sha256_checksum(privKey.data(), 33, c);
-    
-    if( c[0]!=privKey[33] || c[1]!=privKey[34] || 
+
+    if( c[0]!=privKey[33] || c[1]!=privKey[34] ||
         c[2]!=privKey[35] || c[3]!=privKey[36] ) {
-      printf("Warning, Invalid private key checksum !\n");			
+      printf("Warning, Invalid private key checksum !\n");
     }
-    
+
     *compressed = false;
     return ret;
 
@@ -252,14 +251,14 @@ Int Secp256K1::DecodePrivateKey(char *key,bool *compressed) {
     int count = 31;
     for(int i = 1; i < 33; i++)
       ret.SetByte(count--,privKey[i]);
-      
+
     // Compute checksum
     unsigned char c[4];
     sha256_checksum(privKey.data(), 34, c);
 
-    if( c[0]!=privKey[34] || c[1]!=privKey[35] || 
+    if( c[0]!=privKey[34] || c[1]!=privKey[35] ||
         c[2]!=privKey[36] || c[3]!=privKey[37] ) {
-      printf("Warning, Invalid private key checksum !\n");			
+      printf("Warning, Invalid private key checksum !\n");
     }
 
     *compressed = true;
@@ -606,14 +605,14 @@ std::string Secp256K1::GetPrivAddress(bool compressed,Int &privKey) {
 
   address[0] = 0x80; // Mainnet
   privKey.Get32Bytes(address + 1);
-  
+
   if( compressed ) {
-	
+
     // compressed suffix
     address[33] = 1;
     sha256_checksum(address, 34, address + 34);
     return EncodeBase58(address,address + 38);
-	  
+
   } else {
 
     // Compute checksum
@@ -658,29 +657,29 @@ std::vector<std::string> Secp256K1::GetAddress(int type, bool compressed, unsign
   switch (type) {
 
   case P2PKH:
-    add1[0] = 0x00;
-    add2[0] = 0x00;
-    add3[0] = 0x00;
-    add4[0] = 0x00;
+    add1[0] = 0x1c;
+    add2[0] = 0x1c;
+    add3[0] = 0x1c;
+    add4[0] = 0x1c;
     break;
 
   case P2SH:
-    add1[0] = 0x05;
-    add2[0] = 0x05;
-    add3[0] = 0x05;
-    add4[0] = 0x05;
+    add1[0] = 0x1e;
+    add2[0] = 0x1e;
+    add3[0] = 0x1e;
+    add4[0] = 0x1e;
     break;
 
   case BECH32:
   {
     char output[128];
-    segwit_addr_encode(output, "bc", 0, h1, 20);
+    segwit_addr_encode(output, "cpu", 0, h1, 20);
     ret.push_back(std::string(output));
-    segwit_addr_encode(output, "bc", 0, h2, 20);
+    segwit_addr_encode(output, "cpu", 0, h2, 20);
     ret.push_back(std::string(output));
-    segwit_addr_encode(output, "bc", 0, h3, 20);
+    segwit_addr_encode(output, "cpu", 0, h3, 20);
     ret.push_back(std::string(output));
-    segwit_addr_encode(output, "bc", 0, h4, 20);
+    segwit_addr_encode(output, "cpu", 0, h4, 20);
     ret.push_back(std::string(output));
     return ret;
   }
@@ -713,17 +712,17 @@ std::string Secp256K1::GetAddress(int type, bool compressed,unsigned char *hash1
   switch(type) {
 
     case P2PKH:
-      address[0] = 0x00;
+      address[0] = 0x1c;
       break;
 
     case P2SH:
-      address[0] = 0x05;
+      address[0] = 0x1e;
       break;
 
     case BECH32:
     {
       char output[128];
-      segwit_addr_encode(output, "bc", 0, hash160, 20);
+      segwit_addr_encode(output, "cpu", 0, hash160, 20);
       return std::string(output);
     }
     break;
@@ -743,7 +742,7 @@ std::string Secp256K1::GetAddress(int type, bool compressed, Point &pubKey) {
   switch (type) {
 
   case P2PKH:
-    address[0] = 0x00;
+    address[0] = 0x1c;
     break;
 
   case BECH32:
@@ -754,7 +753,7 @@ std::string Secp256K1::GetAddress(int type, bool compressed, Point &pubKey) {
     char output[128];
     uint8_t h160[20];
     GetHash160(type, compressed, pubKey, h160);
-    segwit_addr_encode(output,"bc",0,h160,20);
+    segwit_addr_encode(output,"cpu",0,h160,20);
     return std::string(output);
   }
   break;
@@ -763,7 +762,7 @@ std::string Secp256K1::GetAddress(int type, bool compressed, Point &pubKey) {
     if (!compressed) {
       return " P2SH: Only compressed key ";
     }
-    address[0] = 0x05;
+    address[0] = 0x1e;
     break;
   }
 
@@ -815,7 +814,7 @@ Point Secp256K1::AddDirect(Point &p1,Point &p2) {
 
   r.y.ModSub(&p2.x,&r.x);
   r.y.ModMulK1(&_s);
-  r.y.ModSub(&p2.y);       // ry = - p2.y - s*(ret.x-p2.x);  
+  r.y.ModSub(&p2.y);       // ry = - p2.y - s*(ret.x-p2.x);
 
   return r;
 
@@ -915,7 +914,7 @@ Point Secp256K1::DoubleDirect(Point &p) {
 
   _p.ModMulK1(&a,&_s);
   r.y.ModAdd(&_p,&p.y);
-  r.y.ModNeg();           // ry = neg(p.y + s*(ret.x+neg(p.x)));  
+  r.y.ModNeg();           // ry = neg(p.y + s*(ret.x+neg(p.x)));
 
   return r;
 }

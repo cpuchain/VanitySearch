@@ -1,6 +1,6 @@
-# VanitySearch
+# VanitySearch for CPUchain
 
-VanitySearch is a bitcoin address prefix finder. If you want to generate safe private keys, use the -s option to enter your passphrase which will be used for generating a base key as for BIP38 standard (*VanitySeacrh.exe -s "My PassPhrase" 1MyPrefix*). You can also use *VanitySeacrh.exe -ps "My PassPhrase"* which will add a crypto secure seed to your passphrase.\
+VanitySearch is a CPUchain address prefix finder. If you want to generate safe private keys, use the -s option to enter your passphrase which will be used for generating a base key as for BIP38 standard (*VanitySeacrh.exe -s "My PassPhrase" 1MyPrefix*). You can also use *VanitySeacrh.exe -ps "My PassPhrase"* which will add a crypto secure seed to your passphrase.\
 VanitySearch may not compute a good grid size for your GPU, so try different values using -g option in order to get the best performances. If you want to use GPUs and CPUs together, you may have best performances by keeping one CPU core for handling GPU(s)/CPU exchanges (use -t option to set the number of CPU threads).
 
 # Feature
@@ -56,21 +56,21 @@ VanitySeacrh [-check] [-v] [-u] [-b] [-c] [-gpu] [-stop] [-i inputfile]
  -sp startPubKey: Start the search with a pubKey (for private key splitting)
  -r rekey: Rekey interval in MegaKey, default is disabled
 ```
- 
+
 Exemple (Windows, Intel Core i7-4770 3.4GHz 8 multithreaded cores, GeForce GTX 1050 Ti):
 ```
-C:\C++\VanitySearch\x64\Release>VanitySearch.exe -stop -gpu 1TryMe
-VanitySearch v1.11
-Difficulty: 15318045009
-Search: 1TryMe [Compressed]
-Start Wed Apr  3 08:47:08 2019
-Base Key:87B1EC7916A180ACCF07CAAEFA7F6508F3898F61AF49C201D70DF1543CCBA572
-Number of CPU thread: 7
-GPU: GPU #0 GeForce GTX 1050 Ti (6x128 cores) Grid(48x128)
-245.830 MK/s (GPU 226.348 MK/s) (2^30.87) [P 12.06%][50.00% in 00:00:35][0]
-Pub Addr: 1TryMeTKr3tuJZYHMSNWdPZfhRRNYj3yE
-Priv (WIF): p2pkh:L5NuSjQRARifQJbZ5RyLrQhbSz25jYxupnqqydnBdANeH3QNoUph
-Priv (HEX): 0xF36DD1EEC2A9658E50B39B280D4002ED3A07C7B6C07B37B191973BDDFBF9E375
+C:\C++\VanitySearch\x64\Release>VanitySearch.exe -stop -gpu CPU
+VanitySearch v1.15
+Difficulty: 1354
+Search: CPU [Compressed]
+Start Sat Sep 21 13:31:02 2019
+Base Key: 48030598FDFB5150283F45C3D6E0CFD8BD3BFAEE6C1BEB1AC2F06599CEA280F1
+Number of CPU thread: 11
+
+PubAddress: CPU1GEJYKHsaAiT9mDghwtToEgyGi4vdXV
+Priv (WIF): p2pkh:L3PMpvoEkS4Y9oVdgtkLyWP7jbEV4m28qgtY4j64BuW6B4q3DHjV
+Priv (HEX): 0xB7FCFA670204AEAFD7C0BA3C291F3025FD72E1F8432CB51BFCE1F8F30193BCDE
+GPU: GPU #0 GeForce GTX 1080 Ti (28x128 cores) Grid(224x128)
 ```
 
 ```
@@ -157,7 +157,7 @@ The bitcoin address (P2PKH) consists of a hash160 (displayed in Base58 format) w
 If we have a list of m distinct addresses (m<=2<sup>160</sup>), the search space is then reduced to 2<sup>160</sup>/m, the probability to find a collision after 1 try becomes m/2<sup>160</sup> and the probability to find a collision after n tries becomes 1-(1-m/2<sup>160</sup>)<sup>n</sup>.\
 An example:\
 We have a hardware capable of generating **1GKey/s** and we have an input list of **10<sup>6</sup>** addresses, the following table shows the probability of finding a collision after a certain amount of time:
-  
+
 | Time     |  Probability  |
 |----------|:-------------:|
 | 1 second |6.8e-34|
@@ -172,7 +172,7 @@ We have a hardware capable of generating **1GKey/s** and we have an input list o
 
 Calculation has been done using this [online high precision calculator](https://keisan.casio.com/calculator)
 
-As you can see, even with a competitive hardware, it is very unlikely that you find a collision. Birthday paradox doesn't apply in this context, it works only if we know already the public key (not the address, the hash of the public key) we want to find.  This program doesn't look for collisions between public keys. It searchs only for collisions with addresses with a certain prefix. 
+As you can see, even with a competitive hardware, it is very unlikely that you find a collision. Birthday paradox doesn't apply in this context, it works only if we know already the public key (not the address, the hash of the public key) we want to find.  This program doesn't look for collisions between public keys. It searchs only for collisions with addresses with a certain prefix.
 
 # Compilation
 
@@ -189,7 +189,7 @@ Note: The current relase has been compiled with CUDA SDK 10.0, if you have a dif
 
 Intall CUDA SDK.\
 Depenging on the CUDA SDK version and on your Linux distribution you may need to install an older g++ (just for the CUDA SDK).\
-Edit the makefile and set up the good CUDA SDK path and appropriate compiler for nvcc. 
+Edit the makefile and set up the good CUDA SDK path and appropriate compiler for nvcc.
 
 ```
 CUDA       = /usr/local/cuda-8.0
@@ -228,4 +228,3 @@ Priv (HEX): 0x398E7271AF3E5A78821C1ADFDE3EE90760A6B65F72D856CFE455B1264350BCE8
 # License
 
 VanitySearch is licensed under GPLv3.
-

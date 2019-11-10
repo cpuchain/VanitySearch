@@ -116,7 +116,7 @@ void getInts(string name,vector<int> &tokens, const string &text, char sep) {
 // ------------------------------------------------------------------------------------------
 
 void parseFile(string fileName, vector<string> &lines) {
-  
+
   // Get file size
   FILE *fp = fopen(fileName.c_str(), "rb");
   if (fp == NULL) {
@@ -270,12 +270,11 @@ void reconstructAdd(Secp256K1 *secp, string fileName, string outputFile, string 
       addr = lines[i].substr(10);
 
       switch (addr.data()[0]) {
-      case '1':
+      case 'C':
         addrType = P2PKH; break;
-      case '3':
+      case 'D':
         addrType = P2SH; break;
-      case 'b':
-      case 'B':
+      case 'c':
         addrType = BECH32; break;
       default:
         printf("Invalid partialkey info file at line %d\n", i);
@@ -351,7 +350,7 @@ void reconstructAdd(Secp256K1 *secp, string fileName, string outputFile, string 
       CHECK_ADDR();
 
       if (!found) {
-        printf("Unable to reconstruct final key from partialkey line %d\n Addr: %s\n PartKey: %s\n", 
+        printf("Unable to reconstruct final key from partialkey line %d\n Addr: %s\n PartKey: %s\n",
           i, addr.c_str(),partialPrivAddr.c_str());
       }
 
@@ -372,7 +371,7 @@ int main(int argc, char* argv[]) {
   // Init SecpK1
   Secp256K1 *secp = new Secp256K1();
   secp->Init();
-  
+
   // Browse arguments
   if (argc < 2) {
     printf("Not enough argument\n");
